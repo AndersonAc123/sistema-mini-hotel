@@ -100,8 +100,8 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
                             class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Tempo est. (h) *</label>
-                        <input type="number" id="tempo_estimado" min="1" required
+                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Data/Hora Entrada *</label>
+                        <input type="datetime-local" id="data_hora_entrada" required
                             class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                     </div>
                 </div>
@@ -133,7 +133,7 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
             </div>
 
             <div class="px-6 py-5">
-                <div id="detalhesCheckout" class="bg-violet-50 rounded-xl p-4 space-y-2.5 border border-violet-100">
+                <div class="bg-violet-50 rounded-xl p-4 space-y-2.5 border border-violet-100 mb-4">
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-stone-500">Hóspede</span>
                         <span class="font-semibold text-stone-800" id="checkoutNome">—</span>
@@ -143,12 +143,8 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
                         <span class="font-medium text-stone-700" id="checkoutEntrada">—</span>
                     </div>
                     <div class="flex justify-between items-center text-sm">
-                        <span class="text-stone-500">Tempo estimado</span>
-                        <span class="font-medium text-stone-700"><span id="checkoutTempo">0</span>h</span>
-                    </div>
-                    <div class="flex justify-between items-center text-sm">
-                        <span class="text-stone-500">Tempo cobrado</span>
-                        <span class="font-medium text-violet-600" id="checkoutReal">0</span>
+                        <span class="text-stone-500">Horas cobradas</span>
+                        <span class="font-medium text-violet-600" id="checkoutHoras">—</span>
                     </div>
                     <div class="border-t border-violet-200 pt-3 mt-1 flex justify-between items-center">
                         <span class="font-bold text-stone-700">Total a Pagar</span>
@@ -156,11 +152,19 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
                     </div>
                 </div>
 
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Data/Hora de Saída *</label>
+                    <input type="datetime-local" id="data_hora_saida_input"
+                        class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
+                </div>
+
                 <input type="hidden" id="id_locacao_checkout">
                 <input type="hidden" id="quarto_checkout">
+                <input type="hidden" id="entrada_iso_checkout">
+                <input type="hidden" id="valor_hora_checkout">
 
                 <button onclick="confirmarCheckout()"
-                    class="w-full mt-4 text-white font-semibold py-3 rounded-xl transition active:scale-95"
+                    class="w-full text-white font-semibold py-3 rounded-xl transition active:scale-95"
                     style="background-color:#dc2626;" onmouseover="this.style.backgroundColor='#b91c1c'" onmouseout="this.style.backgroundColor='#dc2626'">
                     Finalizar e Enviar para Limpeza
                 </button>

@@ -29,28 +29,31 @@ switch ($acao) {
         exit;
 
     case 'fazer_checkin':
-        if (!empty($dados->quarto) && !empty($dados->nome) && !empty($dados->cpf) && !empty($dados->telefone) && !empty($dados->data_nascimento) && !empty($dados->tempo_estimado)) {
+        if (!empty($dados->quarto) && !empty($dados->nome) && !empty($dados->cpf) && !empty($dados->telefone) && !empty($dados->data_nascimento) && !empty($dados->data_hora_entrada)) {
             try {
                 $pdo->beginTransaction();
-                
+
                 $sqlCliente = "INSERT INTO cliente (nome, cpf, telefone, data_nascimento) VALUES (:nome, :cpf, :telefone, :data_nascimento)";
                 $stmtCliente = $pdo->prepare($sqlCliente);
                 $stmtCliente->execute([
-                    ':nome' => $dados->nome, 
-                    ':cpf' => $dados->cpf, 
-                    ':telefone' => $dados->telefone, 
+                    ':nome'            => $dados->nome,
+                    ':cpf'             => $dados->cpf,
+                    ':telefone'        => $dados->telefone,
                     ':data_nascimento' => $dados->data_nascimento
                 ]);
                 $id_cliente = $pdo->lastInsertId();
 
-                $sqlLocacao = "INSERT INTO locacao (id_cliente, numero_quarto, data_hora_entrada, tempo_estimado_horas, placa_veiculo, status_caixa) 
-                               VALUES (:id_cliente, :quarto, NOW(), :tempo, :placa, 'Aberto')";
+                // datetime-local envia "YYYY-MM-DDTHH:MM"; MySQL aceita com espaço
+                $dataEntrada = str_replace('T', ' ', $dados->data_hora_entrada);
+
+                $sqlLocacao = "INSERT INTO locacao (id_cliente, numero_quarto, data_hora_entrada, tempo_estimado_horas, placa_veiculo, status_caixa)
+                               VALUES (:id_cliente, :quarto, :entrada, 0, :placa, 'Aberto')";
                 $stmtLocacao = $pdo->prepare($sqlLocacao);
                 $stmtLocacao->execute([
-                    ':id_cliente' => $id_cliente, 
-                    ':quarto' => $dados->quarto, 
-                    ':tempo' => $dados->tempo_estimado, 
-                    ':placa' => $dados->placa_veiculo ?? null
+                    ':id_cliente' => $id_cliente,
+                    ':quarto'     => $dados->quarto,
+                    ':entrada'    => $dataEntrada,
+                    ':placa'      => $dados->placa_veiculo ?? null
                 ]);
 
                 $sqlQuarto = "UPDATE quarto SET status_quarto = 'Ocupado' WHERE numero_quarto = :quarto";
@@ -71,7 +74,7 @@ switch ($acao) {
     case 'obter_detalhes_checkout':
         if (!empty($_GET['quarto'])) {
             try {
-                $sql = "SELECT l.id_locacao, l.data_hora_entrada, l.tempo_estimado_horas, c.nome, cq.valor_hora 
+                $sql = "SELECT l.id_locacao, l.data_hora_entrada, c.nome, cq.valor_hora
                         FROM locacao l
                         INNER JOIN cliente c ON l.id_cliente = c.id_cliente
                         INNER JOIN quarto q ON l.numero_quarto = q.numero_quarto
@@ -83,27 +86,13 @@ switch ($acao) {
 
                 if ($locacao) {
                     $entrada = new DateTime($locacao['data_hora_entrada']);
-                    $agora = new DateTime();
-                    
-                    $intervalo = $entrada->diff($agora);
-                    $horas_reais = ($intervalo->days * 24) + $intervalo->h;
-                    
-                    // Tolerância de 15 minutos
-                    if ($intervalo->i > 15) { 
-                        $horas_reais++; 
-                    }
-                    
-                    $horas_cobradas = max($horas_reais, $locacao['tempo_estimado_horas']);
-                    $valorTotal = $horas_cobradas * $locacao['valor_hora'];
-                    
                     echo json_encode([
-                        'sucesso' => true,
-                        'id_locacao' => $locacao['id_locacao'],
-                        'nome' => $locacao['nome'],
-                        'entrada' => $entrada->format('d/m/Y H:i'),
-                        'tempo_estimado' => $locacao['tempo_estimado_horas'],
-                        'tempo_real' => $horas_cobradas . 'h',
-                        'total' => number_format($valorTotal, 2, '.', '')
+                        'sucesso'              => true,
+                        'id_locacao'           => $locacao['id_locacao'],
+                        'nome'                 => $locacao['nome'],
+                        'entrada'              => $entrada->format('d/m/Y H:i'),
+                        'data_hora_entrada_iso'=> $locacao['data_hora_entrada'],
+                        'valor_hora'           => $locacao['valor_hora']
                     ]);
                 } else {
                     echo json_encode(['sucesso' => false, 'mensagem' => 'Nenhuma locação ativa encontrada.']);
@@ -115,13 +104,25 @@ switch ($acao) {
         exit;
 
     case 'fazer_checkout':
-        if (!empty($dados->id_locacao) && !empty($dados->quarto) && !empty($dados->valor_total)) {
+        if (!empty($dados->id_locacao) && !empty($dados->quarto) && !empty($dados->data_hora_saida)) {
             try {
                 $pdo->beginTransaction();
-                
-                $sqlLocacao = "UPDATE locacao SET data_hora_saida = NOW(), valor_total = :total WHERE id_locacao = :id";
+
+                $dataSaida = str_replace('T', ' ', $dados->data_hora_saida);
+
+                // Calcula total: mínimo 1 hora, arredonda para cima
+                $sqlCalc = "SELECT GREATEST(1, CEIL(TIMESTAMPDIFF(MINUTE, l.data_hora_entrada, :saida) / 60)) * cq.valor_hora AS total
+                            FROM locacao l
+                            INNER JOIN quarto q ON l.numero_quarto = q.numero_quarto
+                            INNER JOIN categoria_quarto cq ON q.codigo_categoria = cq.codigo_categoria
+                            WHERE l.id_locacao = :id";
+                $stmtCalc = $pdo->prepare($sqlCalc);
+                $stmtCalc->execute([':saida' => $dataSaida, ':id' => $dados->id_locacao]);
+                $valorTotal = $stmtCalc->fetchColumn();
+
+                $sqlLocacao = "UPDATE locacao SET data_hora_saida = :saida, valor_total = :total WHERE id_locacao = :id";
                 $stmtLocacao = $pdo->prepare($sqlLocacao);
-                $stmtLocacao->execute([':total' => $dados->valor_total, ':id' => $dados->id_locacao]);
+                $stmtLocacao->execute([':saida' => $dataSaida, ':total' => $valorTotal, ':id' => $dados->id_locacao]);
 
                 $sqlQuarto = "UPDATE quarto SET status_quarto = 'Em Limpeza' WHERE numero_quarto = :quarto";
                 $stmtQuarto = $pdo->prepare($sqlQuarto);

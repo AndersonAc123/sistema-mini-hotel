@@ -104,6 +104,12 @@ function abrirModal(numeroQuarto) {
     document.getElementById('tituloModal').innerText = `Entrada — Quarto ${numeroQuarto}`;
     document.getElementById('quarto_selecionado').value = numeroQuarto;
     document.getElementById('mensagemModal').classList.add('hidden');
+
+    // Preenche data/hora de entrada com o momento atual
+    const agora = new Date();
+    agora.setSeconds(0, 0);
+    document.getElementById('data_hora_entrada').value =
+        agora.toISOString().slice(0, 16);
 }
 
 function fecharModal() {
@@ -121,13 +127,13 @@ document.getElementById('formCheckin').addEventListener('submit', function(e) {
     if (partes.length === 3) dataParaBanco = `${partes[2]}-${partes[1]}-${partes[0]}`;
 
     const dados = {
-        quarto:          document.getElementById('quarto_selecionado').value,
-        nome:            document.getElementById('nome').value,
-        cpf:             document.getElementById('cpf').value,
-        telefone:        document.getElementById('telefone').value,
-        data_nascimento: dataParaBanco,
-        placa_veiculo:   document.getElementById('placa_veiculo').value,
-        tempo_estimado:  document.getElementById('tempo_estimado').value
+        quarto:           document.getElementById('quarto_selecionado').value,
+        nome:             document.getElementById('nome').value,
+        cpf:              document.getElementById('cpf').value,
+        telefone:         document.getElementById('telefone').value,
+        data_nascimento:  dataParaBanco,
+        placa_veiculo:    document.getElementById('placa_veiculo').value,
+        data_hora_entrada: document.getElementById('data_hora_entrada').value
     };
 
     fetch('../backend/api.php?acao=fazer_checkin', {
@@ -159,8 +165,13 @@ function abrirModalCheckout(numeroQuarto) {
     document.getElementById('quarto_checkout').value = numeroQuarto;
     document.getElementById('mensagemCheckout').classList.add('hidden');
 
-    ['checkoutNome','checkoutEntrada','checkoutTempo','checkoutReal','checkoutTotal']
+    ['checkoutNome','checkoutEntrada','checkoutHoras','checkoutTotal']
         .forEach(id => document.getElementById(id).innerText = '...');
+
+    // Preenche saída com horário atual
+    const agora = new Date();
+    agora.setSeconds(0, 0);
+    document.getElementById('data_hora_saida_input').value = agora.toISOString().slice(0, 16);
 
     fetch(`../backend/api.php?acao=obter_detalhes_checkout&quarto=${numeroQuarto}`)
     .then(r => r.json())
@@ -168,15 +179,41 @@ function abrirModalCheckout(numeroQuarto) {
         if (dados.sucesso) {
             document.getElementById('checkoutNome').innerText    = dados.nome;
             document.getElementById('checkoutEntrada').innerText = dados.entrada;
-            document.getElementById('checkoutTempo').innerText   = dados.tempo_estimado;
-            document.getElementById('checkoutReal').innerText    = dados.tempo_real;
-            document.getElementById('checkoutTotal').innerText   = dados.total;
             document.getElementById('id_locacao_checkout').value = dados.id_locacao;
+            document.getElementById('entrada_iso_checkout').value = dados.data_hora_entrada_iso;
+            document.getElementById('valor_hora_checkout').value  = dados.valor_hora;
+            atualizarTotalCheckout();
         } else {
             alert(dados.mensagem);
             fecharModalCheckout();
         }
     });
+}
+
+// Recalcula horas e total sempre que o usuário muda a data/hora de saída
+document.getElementById('data_hora_saida_input').addEventListener('change', atualizarTotalCheckout);
+
+function atualizarTotalCheckout() {
+    const entradaISO = document.getElementById('entrada_iso_checkout').value;
+    const saidaVal   = document.getElementById('data_hora_saida_input').value;
+    const valorHora  = parseFloat(document.getElementById('valor_hora_checkout').value || '0');
+
+    if (!entradaISO || !saidaVal) return;
+
+    const entrada = new Date(entradaISO.replace(' ', 'T'));
+    const saida   = new Date(saidaVal);
+    const minutos = (saida - entrada) / (1000 * 60);
+
+    if (minutos <= 0) {
+        document.getElementById('checkoutHoras').innerText = '—';
+        document.getElementById('checkoutTotal').innerText = '0,00';
+        return;
+    }
+
+    const horas = Math.max(1, Math.ceil(minutos / 60));
+    const total = (horas * valorHora).toFixed(2).replace('.', ',');
+    document.getElementById('checkoutHoras').innerText = `${horas}h`;
+    document.getElementById('checkoutTotal').innerText = total;
 }
 
 function fecharModalCheckout() {
@@ -185,10 +222,16 @@ function fecharModalCheckout() {
 }
 
 function confirmarCheckout() {
+    const saidaVal = document.getElementById('data_hora_saida_input').value;
+    if (!saidaVal) {
+        alert('Informe a data e hora de saída.');
+        return;
+    }
+
     const dadosCheckout = {
-        id_locacao:  document.getElementById('id_locacao_checkout').value,
-        quarto:      document.getElementById('quarto_checkout').value,
-        valor_total: document.getElementById('checkoutTotal').innerText
+        id_locacao:      document.getElementById('id_locacao_checkout').value,
+        quarto:          document.getElementById('quarto_checkout').value,
+        data_hora_saida: saidaVal
     };
 
     fetch('../backend/api.php?acao=fazer_checkout', {
