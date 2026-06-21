@@ -16,9 +16,10 @@ switch ($acao) {
     
     case 'buscar_quartos':
         try {
-            $sql = "SELECT q.numero_quarto, q.status_quarto, cq.nome_categoria, cq.valor_hora 
-                    FROM quarto q 
-                    INNER JOIN categoria_quarto cq ON q.codigo_categoria = cq.codigo_categoria 
+            $sql = "SELECT q.numero_quarto, q.status_quarto, cq.nome_categoria, cq.valor_hora
+                    FROM quarto q
+                    INNER JOIN categoria_quarto cq ON q.codigo_categoria = cq.codigo_categoria
+                    WHERE q.ativo = 1
                     ORDER BY q.numero_quarto ASC";
             $stmt = $pdo->query($sql);
             echo json_encode(['sucesso' => true, 'quartos' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
@@ -285,6 +286,59 @@ switch ($acao) {
                 echo json_encode(['sucesso' => true, 'mensagem' => 'Categoria do quarto atualizada com sucesso!']);
             } catch (Exception $e) {
                 echo json_encode(['sucesso' => false, 'mensagem' => 'Erro: ' . $e->getMessage()]);
+            }
+        }
+        break;
+
+    case 'buscar_quartos_inativos':
+        try {
+            $sql = "SELECT q.numero_quarto, cq.nome_categoria
+                    FROM quarto q
+                    INNER JOIN categoria_quarto cq ON q.codigo_categoria = cq.codigo_categoria
+                    WHERE q.ativo = 0
+                    ORDER BY q.numero_quarto ASC";
+            $stmt = $pdo->query($sql);
+            echo json_encode(['sucesso' => true, 'quartos' => $stmt->fetchAll(PDO::FETCH_ASSOC)]);
+        } catch (Exception $e) {
+            echo json_encode(['sucesso' => false, 'mensagem' => $e->getMessage()]);
+        }
+        break;
+
+    case 'reativar_quarto':
+        if (!empty($dados->numero)) {
+            try {
+                $sql = "UPDATE quarto SET ativo = 1, status_quarto = 'Livre' WHERE numero_quarto = :numero";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([':numero' => $dados->numero]);
+                echo json_encode(['sucesso' => true, 'mensagem' => 'Quarto reativado com sucesso!']);
+            } catch (Exception $e) {
+                echo json_encode(['sucesso' => false, 'mensagem' => $e->getMessage()]);
+            }
+        }
+        break;
+
+    case 'desativar_quarto':
+        if (!empty($dados->numero)) {
+            try {
+                $stmtCheck = $pdo->prepare("SELECT status_quarto FROM quarto WHERE numero_quarto = :numero AND ativo = 1");
+                $stmtCheck->execute([':numero' => $dados->numero]);
+                $quarto = $stmtCheck->fetch(PDO::FETCH_ASSOC);
+
+                if (!$quarto) {
+                    echo json_encode(['sucesso' => false, 'mensagem' => 'Quarto não encontrado.']);
+                    exit;
+                }
+                if ($quarto['status_quarto'] !== 'Livre') {
+                    echo json_encode(['sucesso' => false, 'mensagem' => 'Não é possível desativar um quarto ocupado ou em limpeza.']);
+                    exit;
+                }
+
+                $sql = "UPDATE quarto SET ativo = 0 WHERE numero_quarto = :numero";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([':numero' => $dados->numero]);
+                echo json_encode(['sucesso' => true, 'mensagem' => 'Quarto desativado com sucesso!']);
+            } catch (Exception $e) {
+                echo json_encode(['sucesso' => false, 'mensagem' => $e->getMessage()]);
             }
         }
         break;

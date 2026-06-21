@@ -42,7 +42,8 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
         .btn-historico:hover { background: #138496; }
 
         .btn-acao { border: none; padding: 6px 15px; border-radius: 4px; cursor: pointer; font-size: 13px; color: white; margin-right: 5px;}
-        .btn-editar { background: #ffc107; color: black; font-weight: bold; width: 100%; }
+        .btn-editar { background: #ffc107; color: black; font-weight: bold; }
+        .btn-desativar { background: #dc3545; }
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); }
         .modal-conteudo { background-color: #fff; margin: 5% auto; padding: 25px; border-radius: 8px; width: 90%; max-width: 800px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
@@ -56,8 +57,8 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
     <div class="cabecalho">
         <h2>Painel Gerencial</h2>
         <div>
-            <button class="btn-historico" onclick="abrirModalHistorico()">📄 Relatório de Locações</button>
-            <a href="recepcao.php">⬅ Voltar para Recepção</a>
+            <button class="btn-historico" onclick="abrirModalHistorico()">Relatório de Locações</button>
+            <a href="recepcao.php">Voltar para Recepção</a>
         </div>
     </div>
 
@@ -66,9 +67,9 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
             <div class="card card-faturamento">
                 <h3>Faturamento do Turno</h3>
                 <h1 id="valorFaturamento">R$ 0,00</h1>
-                <button class="btn-fechar-caixa" onclick="abrirModalCaixa()">💳 Fechar Faturamento do Dia</button>
-                <button class="btn-ver-caixas" onclick="abrirModalHistoricoCaixa()">📊 Ver Fechamentos Diários</button>
-                <button class="btn-ver-caixas" style="background: #007bff;" onclick="abrirModalHistoricoMes()">📅 Ver Fechamento Mensal</button>
+                <button class="btn-fechar-caixa" onclick="abrirModalCaixa()">Fechar Faturamento do Dia</button>
+                <button class="btn-ver-caixas" onclick="abrirModalHistoricoCaixa()">Ver Fechamentos Diários</button>
+                <button class="btn-ver-caixas" style="background: #007bff;" onclick="abrirModalHistoricoMes()">Ver Fechamento Mensal</button>
             </div>
             
             <div class="card">
@@ -81,21 +82,39 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
             </div>
         </div>
 
-        <div class="card">
-            <button class="btn-novo-quarto" onclick="abrirModalNovoQuarto()">+ Novo Quarto</button>
-            <h3>Gestão de Quartos</h3>
-            <div class="tabela-scroll">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Nº</th>
-                            <th>Categoria</th>
-                            <th>Status Atual</th>
-                            <th style="text-align: center;">Ações</th>
-                        </tr>
-                    </thead>
-                    <tbody id="tabelaQuartos"></tbody>
-                </table>
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+            <div class="card">
+                <button class="btn-novo-quarto" onclick="abrirModalNovoQuarto()">+ Novo Quarto</button>
+                <h3>Gestão de Quartos</h3>
+                <div class="tabela-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nº</th>
+                                <th>Categoria</th>
+                                <th>Status Atual</th>
+                                <th style="text-align: center;">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaQuartos"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card" id="cardInativos" style="display: none;">
+                <h3 style="color: #dc3545;">Quartos Desativados</h3>
+                <div class="tabela-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Nº</th>
+                                <th>Categoria</th>
+                                <th style="text-align: center;">Ação</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaInativos"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -233,7 +252,8 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
                                 <td>${q.nome_categoria}</td>
                                 <td style="color: ${cor}; font-weight: bold;">${q.status_quarto}</td>
                                 <td style="text-align: center;">
-                                    <button class="btn-acao btn-editar" onclick="abrirModalEditarQuarto(${q.numero_quarto})">✏️ Alterar Categoria</button>
+                                    <button class="btn-acao btn-editar" onclick="abrirModalEditarQuarto(${q.numero_quarto})">Alterar Categoria</button>
+                                    ${q.status_quarto === 'Livre' ? `<button class="btn-acao btn-desativar" onclick="confirmarDesativar(${q.numero_quarto})">Desativar</button>` : ''}
                                 </td>
                             </tr>
                         `;
@@ -342,8 +362,56 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
         }
         function fecharModalHistorico() { document.getElementById('modalHistorico').style.display = 'none'; }
 
+        function carregarQuartosInativos() {
+            fetch('../backend/api.php?acao=buscar_quartos_inativos').then(res => res.json()).then(dados => {
+                const card = document.getElementById('cardInativos');
+                const tbody = document.getElementById('tabelaInativos');
+                tbody.innerHTML = '';
+                if (dados.sucesso && dados.quartos.length > 0) {
+                    card.style.display = 'block';
+                    dados.quartos.forEach(q => {
+                        tbody.innerHTML += `
+                            <tr>
+                                <td><strong>${q.numero_quarto}</strong></td>
+                                <td>${q.nome_categoria}</td>
+                                <td style="text-align: center;">
+                                    <button class="btn-acao" style="background: #28a745;" onclick="reativarQuarto(${q.numero_quarto})">Reativar</button>
+                                </td>
+                            </tr>`;
+                    });
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function reativarQuarto(numero) {
+            fetch('../backend/api.php?acao=reativar_quarto', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ numero: numero })
+            }).then(res => res.json()).then(dados => {
+                alert(dados.mensagem);
+                if (dados.sucesso) { carregarListaQuartos(); carregarQuartosInativos(); }
+            });
+        }
+
+        function confirmarDesativar(numero) {
+            if (confirm(`Desativar o quarto ${numero}? Ele será ocultado do sistema mas o histórico será preservado.`)) {
+                fetch('../backend/api.php?acao=desativar_quarto', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ numero: numero })
+                }).then(res => res.json()).then(dados => {
+                    alert(dados.mensagem);
+                    if (dados.sucesso) carregarListaQuartos();
+                });
+            }
+        }
+
         carregarPainel();
         carregarListaQuartos();
+        carregarQuartosInativos();
     </script>
 </body>
 </html>

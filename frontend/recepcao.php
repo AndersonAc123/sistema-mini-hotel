@@ -32,7 +32,7 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
         <h2>Olá, <?= $_SESSION['nome'] ?>!</h2>
         <div>
             <?php if ($_SESSION['nivel'] == 'admin'): ?>
-                <a href="painel.php" class="btn-admin">⚙️ Painel Gerencial</a>
+                <a href="painel.php" class="btn-admin">Painel Gerencial</a>
             <?php endif; ?> 
             <a href="login.html" style="margin-left: 15px; color: red; text-decoration: none;">Sair</a>
         </div>
