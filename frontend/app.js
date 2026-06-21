@@ -42,7 +42,7 @@ function carregarQuartos() {
                 <p style="font-size:10px;color:#9ca3af;text-transform:uppercase;letter-spacing:.08em;margin-bottom:2px;">Quarto</p>
                 <h3 style="font-size:2rem;font-weight:800;color:#1c1917;margin:0 0 4px 0;">${q.numero_quarto}</h3>
                 <p style="font-size:12px;color:#78716c;margin:0 0 2px 0;">${q.nome_categoria}</p>
-                <p style="font-size:13px;font-weight:600;color:#b45309;margin:0 0 10px 0;">R$ ${parseFloat(q.valor_hora).toFixed(2)}/h</p>
+                <p style="font-size:13px;font-weight:600;color:#7c3aed;margin:0 0 10px 0;">R$ ${parseFloat(q.valor_hora).toFixed(2)}/h</p>
                 <span style="display:inline-block;padding:3px 10px;border-radius:999px;font-size:11px;font-weight:700;background:${badgeBg};color:${badgeText};">
                     ${q.status_quarto}
                 </span>

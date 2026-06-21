@@ -10,28 +10,28 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
     <title>Recepção — Mini Hotel</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen" style="background-color:#fdf6ec;">
+<body class="min-h-screen" style="background-color:#f5f3ff;">
 
     <!-- NAVBAR -->
-    <header class="sticky top-0 z-10 shadow-lg" style="background-color:#3d1a00;">
+    <header class="sticky top-0 z-10 shadow-lg" style="background-color:#1e1b4b;">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color:#b45309;">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color:#7c3aed;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-violet-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M3.75 3h16.5M4.5 3v18M19.5 3v18M9 7.5h1.5m4.5 0H16.5M9 12h1.5m4.5 0H16.5M9 16.5h1.5m4.5 0H16.5" />
                     </svg>
                 </div>
                 <div>
                     <h1 class="text-white font-bold text-base leading-tight">Mini Hotel</h1>
-                    <p class="text-amber-400 text-xs">Recepção</p>
+                    <p class="text-violet-300 text-xs">Recepção</p>
                 </div>
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-amber-200 text-sm hidden sm:inline">Olá, <strong><?= htmlspecialchars($_SESSION['nome']) ?></strong></span>
+                <span class="text-violet-200 text-sm hidden sm:inline">Olá, <strong><?= htmlspecialchars($_SESSION['nome']) ?></strong></span>
                 <?php if ($_SESSION['nivel'] == 'admin'): ?>
                     <a href="painel.php"
-                        class="text-sm font-medium px-3 py-1.5 rounded-lg transition text-amber-900"
-                        style="background-color:#f59e0b;" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
+                        class="text-sm font-medium px-3 py-1.5 rounded-lg transition text-white"
+                        style="background-color:#7c3aed;" onmouseover="this.style.backgroundColor='#6d28d9'" onmouseout="this.style.backgroundColor='#7c3aed'">
                         Painel Gerencial
                     </a>
                 <?php endif; ?>
@@ -77,19 +77,19 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
                 <div>
                     <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Nome Completo *</label>
                     <input type="text" id="nome" required
-                        class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition text-sm">
+                        class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                 </div>
 
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">CPF *</label>
                         <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" required
-                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition text-sm">
+                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Telefone *</label>
                         <input type="text" id="telefone" placeholder="(00) 00000-0000" maxlength="15" required
-                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition text-sm">
+                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                     </div>
                 </div>
 
@@ -97,19 +97,19 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
                     <div>
                         <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Nascimento *</label>
                         <input type="text" id="data_nascimento" placeholder="DD/MM/AAAA" maxlength="10" required
-                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition text-sm">
+                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Tempo est. (h) *</label>
                         <input type="number" id="tempo_estimado" min="1" required
-                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition text-sm">
+                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Placa do Veículo (opcional)</label>
                     <input type="text" id="placa_veiculo" placeholder="ABC-1234"
-                        class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:bg-white transition text-sm">
+                        class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                 </div>
 
                 <button type="submit"
@@ -133,7 +133,7 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
             </div>
 
             <div class="px-6 py-5">
-                <div id="detalhesCheckout" class="bg-amber-50 rounded-xl p-4 space-y-2.5 border border-amber-100">
+                <div id="detalhesCheckout" class="bg-violet-50 rounded-xl p-4 space-y-2.5 border border-violet-100">
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-stone-500">Hóspede</span>
                         <span class="font-semibold text-stone-800" id="checkoutNome">—</span>
@@ -148,9 +148,9 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
                     </div>
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-stone-500">Tempo cobrado</span>
-                        <span class="font-medium text-amber-700" id="checkoutReal">0</span>
+                        <span class="font-medium text-violet-600" id="checkoutReal">0</span>
                     </div>
-                    <div class="border-t border-amber-200 pt-3 mt-1 flex justify-between items-center">
+                    <div class="border-t border-violet-200 pt-3 mt-1 flex justify-between items-center">
                         <span class="font-bold text-stone-700">Total a Pagar</span>
                         <span class="text-2xl font-bold text-red-600">R$ <span id="checkoutTotal">0,00</span></span>
                     </div>

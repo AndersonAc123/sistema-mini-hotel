@@ -13,20 +13,20 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
     <title>Painel Gerencial — Mini Hotel</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="min-h-screen" style="background-color:#fdf6ec;">
+<body class="min-h-screen" style="background-color:#f5f3ff;">
 
     <!-- NAVBAR -->
-    <header class="sticky top-0 z-10 shadow-lg" style="background-color:#3d1a00;">
+    <header class="sticky top-0 z-10 shadow-lg" style="background-color:#1e1b4b;">
         <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color:#b45309;">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-amber-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color:#7c3aed;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-violet-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3v11.25A2.25 2.25 0 006 16.5h2.25M3.75 3h-1.5m1.5 0h16.5m0 0h1.5m-1.5 0v11.25A2.25 2.25 0 0118 16.5h-2.25m-7.5 0h7.5m-7.5 0l-1 3m8.5-3l1 3m0 0l.5 1.5m-.5-1.5h-9.5m0 0l-.5 1.5M9 11.25v1.5M12 9v3.75m3-6v6" />
                     </svg>
                 </div>
                 <div>
                     <h1 class="text-white font-bold text-base leading-tight">Mini Hotel</h1>
-                    <p class="text-amber-400 text-xs">Painel Gerencial</p>
+                    <p class="text-violet-300 text-xs">Painel Gerencial</p>
                 </div>
             </div>
             <div class="flex items-center gap-4">
@@ -34,7 +34,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
                     class="text-sm font-medium px-3 py-1.5 rounded-lg transition text-white border border-amber-700 hover:bg-amber-900">
                     Relatório de Locações
                 </button>
-                <a href="recepcao.php" class="text-amber-300 hover:text-amber-100 text-sm font-medium transition">Recepção</a>
+                <a href="recepcao.php" class="text-violet-200 hover:text-violet-100 text-sm font-medium transition">Recepção</a>
                 <a href="login.html" class="text-red-400 hover:text-red-300 text-sm font-medium transition">Sair</a>
             </div>
         </div>
@@ -48,9 +48,9 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
             <div class="flex flex-col gap-6">
 
                 <!-- Card Faturamento -->
-                <div class="bg-white rounded-2xl shadow-sm border border-amber-100 p-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-violet-100 p-6">
                     <p class="text-xs font-semibold text-stone-400 uppercase tracking-widest mb-1">Faturamento do Turno</p>
-                    <p id="valorFaturamento" class="text-4xl font-black mb-5" style="color:#b45309;">R$ 0,00</p>
+                    <p id="valorFaturamento" class="text-4xl font-black mb-5" style="color:#7c3aed;">R$ 0,00</p>
                     <div class="flex flex-col gap-2">
                         <button onclick="abrirModalCaixa()"
                             class="w-full text-white font-semibold py-2.5 rounded-xl transition text-sm"
@@ -70,7 +70,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
                 </div>
 
                 <!-- Card Categorias -->
-                <div class="bg-white rounded-2xl shadow-sm border border-amber-100 p-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-violet-100 p-6">
                     <h3 class="text-sm font-bold text-stone-700 uppercase tracking-wide mb-4">Gestão de Preços</h3>
                     <div id="mensagemPrecos" class="text-center text-sm font-medium mb-2 hidden"></div>
                     <table class="w-full text-sm">
@@ -90,7 +90,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
             <div class="lg:col-span-2 flex flex-col gap-6">
 
                 <!-- Card Quartos Ativos -->
-                <div class="bg-white rounded-2xl shadow-sm border border-amber-100 p-6">
+                <div class="bg-white rounded-2xl shadow-sm border border-violet-100 p-6">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-sm font-bold text-stone-700 uppercase tracking-wide">Gestão de Quartos</h3>
                         <button onclick="abrirModalNovoQuarto()"
@@ -278,7 +278,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
                         class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-amber-400 text-sm"></select>
                 </div>
                 <button onclick="salvarEdicaoQuarto()"
-                    class="w-full font-semibold py-3 rounded-xl transition text-amber-900"
+                    class="w-full font-semibold py-3 rounded-xl transition text-violet-900"
                     style="background-color:#f59e0b;" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
                     Atualizar Categoria
                 </button>
@@ -320,7 +320,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
                             <td class="py-2.5 pl-2">
                                 <button onclick="atualizarPreco(${cat.codigo_categoria})"
                                     class="text-xs text-white px-2.5 py-1 rounded-lg font-semibold"
-                                    style="background-color:#b45309;">Salvar</button>
+                                    style="background-color:#7c3aed;">Salvar</button>
                             </td>
                         </tr>`;
                     const opt = `<option value="${cat.codigo_categoria}">${cat.nome_categoria}</option>`;
@@ -356,8 +356,8 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
                             <td class="py-2.5 px-3 text-xs font-bold" style="${sc}">${q.status_quarto}</td>
                             <td class="py-2.5 px-3 text-center">
                                 <button onclick="abrirModalEditarQuarto(${q.numero_quarto})"
-                                    class="text-xs font-semibold px-2 py-1 rounded-lg mr-1 text-amber-900"
-                                    style="background-color:#fef3c7;">Categoria</button>
+                                    class="text-xs font-semibold px-2 py-1 rounded-lg mr-1 text-violet-900"
+                                    style="background-color:#ede9fe;">Categoria</button>
                                 ${q.status_quarto === 'Livre' ? `<button onclick="confirmarDesativar(${q.numero_quarto})"
                                     class="text-xs text-white font-semibold px-2 py-1 rounded-lg"
                                     style="background-color:#dc2626;">Desativar</button>` : ''}
