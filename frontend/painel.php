@@ -467,13 +467,21 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
                 tbody.innerHTML = '';
                 if (dados.sucesso && dados.historico.length > 0) {
                     dados.historico.forEach(loc => {
-                        const v = parseFloat(loc.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                        const v     = loc.valor_total
+                            ? parseFloat(loc.valor_total).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
+                            : null;
+                        const saida = loc.saida
+                            ? `<span class="text-stone-500">${loc.saida}</span>`
+                            : `<span class="text-amber-600 font-semibold">Em andamento</span>`;
+                        const valor = v
+                            ? `<span style="color:#16a34a;">${v}</span>`
+                            : `<span class="text-stone-300">—</span>`;
                         tbody.innerHTML += `<tr class="border-b border-stone-50 hover:bg-stone-50">
                             <td class="py-2.5 text-stone-700">${loc.nome}</td>
                             <td class="py-2.5 text-center font-bold text-stone-800">${loc.numero_quarto}</td>
-                            <td class="py-2.5 text-stone-500 text-xs">${loc.entrada}</td>
-                            <td class="py-2.5 text-stone-500 text-xs">${loc.saida}</td>
-                            <td class="py-2.5 text-right font-bold" style="color:#16a34a;">${v}</td>
+                            <td class="py-2.5 text-xs">${loc.entrada}</td>
+                            <td class="py-2.5 text-xs">${saida}</td>
+                            <td class="py-2.5 text-right font-bold text-sm">${valor}</td>
                         </tr>`;
                     });
                 } else {

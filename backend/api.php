@@ -208,13 +208,14 @@ switch ($acao) {
                     FROM locacao l
                     INNER JOIN cliente c ON l.id_cliente = c.id_cliente
                     INNER JOIN quarto q ON l.numero_quarto = q.numero_quarto
-                    WHERE l.data_hora_saida IS NOT NULL
-                    ORDER BY l.data_hora_saida DESC LIMIT 50";
+                    ORDER BY l.data_hora_entrada DESC LIMIT 50";
             $stmt = $pdo->query($sql);
             $historico = $stmt->fetchAll(PDO::FETCH_ASSOC);
             foreach ($historico as &$linha) {
                 $linha['entrada'] = date('d/m/Y H:i', strtotime($linha['data_hora_entrada']));
-                $linha['saida'] = date('d/m/Y H:i', strtotime($linha['data_hora_saida']));
+                $linha['saida']   = $linha['data_hora_saida']
+                    ? date('d/m/Y H:i', strtotime($linha['data_hora_saida']))
+                    : null;
             }
             echo json_encode(['sucesso' => true, 'historico' => $historico]);
         } catch (Exception $e) {
