@@ -322,6 +322,9 @@ function perguntarLiberacaoLimpeza(numeroQuarto) {
 
 function fecharModalLimpeza() {
     document.getElementById('modalLimpeza').classList.add('hidden');
+    const msg = document.getElementById('mensagemLimpeza');
+    msg.classList.add('hidden');
+    msg.innerText = '';
 }
 
 function confirmarLimpeza() {
