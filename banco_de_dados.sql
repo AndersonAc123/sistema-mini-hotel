@@ -61,9 +61,14 @@ INSERT INTO usuario (nome, login, senha, nivel_acesso) VALUES
 ('João (Recepção)', 'recepcao', '1234', 'recepcao');
 
 INSERT INTO categoria_quarto (codigo_categoria, nome_categoria, valor_hora) VALUES
-(1, 'Solteiro Simples', 30.00),
-(2, 'Casal Padrão', 45.00),
-(3, 'Casal Master', 80.00);
+(1, 'Beliche Compartilhado', 30.00),
+(2, 'Quarto Privativo', 45.00),
+(3, 'Suíte Premium', 80.00);
+
+-- Atualizar nomes caso o banco já exista:
+-- UPDATE categoria_quarto SET nome_categoria = 'Beliche Compartilhado' WHERE codigo_categoria = 1;
+-- UPDATE categoria_quarto SET nome_categoria = 'Quarto Privativo'      WHERE codigo_categoria = 2;
+-- UPDATE categoria_quarto SET nome_categoria = 'Suíte Premium'         WHERE codigo_categoria = 3;
 
 INSERT INTO quarto (numero_quarto, codigo_categoria, status_quarto) VALUES
 (101, 1, 'Livre'), (102, 1, 'Livre'), (103, 1, 'Livre'),

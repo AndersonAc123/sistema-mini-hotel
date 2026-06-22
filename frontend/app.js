@@ -72,8 +72,46 @@ function carregarQuartos() {
 carregarQuartos();
 
 // ==========================================
+// HELPERS DE DATA/HORA
+// ==========================================
+function agoraTexto() {
+    const d = new Date();
+    const p = n => String(n).padStart(2, '0');
+    return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+
+function textoParaISO(str) {
+    // "DD/MM/AAAA HH:MM" → "YYYY-MM-DDTHH:MM"
+    const [data, hora] = (str || '').split(' ');
+    if (!data || !hora) return '';
+    const [dia, mes, ano] = data.split('/');
+    return `${ano}-${mes}-${dia}T${hora}`;
+}
+
+function parseDataHoraTexto(str) {
+    const iso = textoParaISO(str);
+    return iso ? new Date(iso) : null;
+}
+
+// ==========================================
 // MÁSCARAS DE ENTRADA
 // ==========================================
+function mascaraDataHora(e) {
+    let v = e.target.value.replace(/\D/g, '');
+    if (v.length > 12) v = v.slice(0, 12);
+    v = v.replace(/^(\d{2})(\d)/, '$1/$2');
+    v = v.replace(/^(\d{2}\/\d{2})(\d)/, '$1/$2');
+    v = v.replace(/^(\d{2}\/\d{2}\/\d{4})(\d)/, '$1 $2');
+    v = v.replace(/^(\d{2}\/\d{2}\/\d{4} \d{2})(\d)/, '$1:$2');
+    e.target.value = v;
+}
+
+document.getElementById('data_hora_entrada').addEventListener('input', mascaraDataHora);
+document.getElementById('data_hora_saida_input').addEventListener('input', function(e) {
+    mascaraDataHora(e);
+    atualizarTotalCheckout();
+});
+
 document.getElementById('data_nascimento').addEventListener('input', function(e) {
     let v = e.target.value.replace(/\D/g, '');
     v = v.replace(/(\d{2})(\d)/, '$1/$2');
@@ -105,12 +143,7 @@ function abrirModal(numeroQuarto) {
     document.getElementById('quarto_selecionado').value = numeroQuarto;
     document.getElementById('mensagemModal').classList.add('hidden');
 
-    // Preenche data/hora de entrada com o momento atual (horário local)
-    const agora = new Date();
-    agora.setSeconds(0, 0);
-    const offset = agora.getTimezoneOffset() * 60000;
-    document.getElementById('data_hora_entrada').value =
-        new Date(agora - offset).toISOString().slice(0, 16);
+    document.getElementById('data_hora_entrada').value = agoraTexto();
 }
 
 function fecharModal() {
@@ -134,7 +167,7 @@ document.getElementById('formCheckin').addEventListener('submit', function(e) {
         telefone:         document.getElementById('telefone').value,
         data_nascimento:  dataParaBanco,
         placa_veiculo:    document.getElementById('placa_veiculo').value,
-        data_hora_entrada: document.getElementById('data_hora_entrada').value
+        data_hora_entrada: textoParaISO(document.getElementById('data_hora_entrada').value)
     };
 
     fetch('../backend/api.php?acao=fazer_checkin', {
@@ -169,12 +202,7 @@ function abrirModalCheckout(numeroQuarto) {
     ['checkoutNome','checkoutEntrada','checkoutHoras','checkoutTotal']
         .forEach(id => document.getElementById(id).innerText = '...');
 
-    // Preenche saída com horário atual (horário local)
-    const agora = new Date();
-    agora.setSeconds(0, 0);
-    const offset = agora.getTimezoneOffset() * 60000;
-    document.getElementById('data_hora_saida_input').value =
-        new Date(agora - offset).toISOString().slice(0, 16);
+    document.getElementById('data_hora_saida_input').value = agoraTexto();
 
     fetch(`../backend/api.php?acao=obter_detalhes_checkout&quarto=${numeroQuarto}`)
     .then(r => r.json())
@@ -187,14 +215,13 @@ function abrirModalCheckout(numeroQuarto) {
             document.getElementById('valor_hora_checkout').value  = dados.valor_hora;
             atualizarTotalCheckout();
         } else {
-            alert(dados.mensagem);
-            fecharModalCheckout();
+            const el = document.getElementById('mensagemCheckout');
+            el.classList.remove('hidden');
+            el.style.color = '#dc2626';
+            el.innerText = dados.mensagem;
         }
     });
 }
-
-// Recalcula horas e total sempre que o usuário muda a data/hora de saída
-document.getElementById('data_hora_saida_input').addEventListener('change', atualizarTotalCheckout);
 
 function atualizarTotalCheckout() {
     const entradaISO = document.getElementById('entrada_iso_checkout').value;
@@ -204,7 +231,7 @@ function atualizarTotalCheckout() {
     if (!entradaISO || !saidaVal) return;
 
     const entrada = new Date(entradaISO.replace(' ', 'T'));
-    const saida   = new Date(saidaVal);
+    const saida   = parseDataHoraTexto(saidaVal);
     const minutos = (saida - entrada) / (1000 * 60);
 
     if (minutos <= 0) {
@@ -226,15 +253,20 @@ function fecharModalCheckout() {
 
 function confirmarCheckout() {
     const saidaVal = document.getElementById('data_hora_saida_input').value;
-    if (!saidaVal) {
-        alert('Informe a data e hora de saída.');
+    const saidaISO = textoParaISO(saidaVal);
+
+    if (!saidaISO) {
+        const el = document.getElementById('mensagemCheckout');
+        el.classList.remove('hidden');
+        el.style.color = '#dc2626';
+        el.innerText = 'Informe a data e hora de saída no formato DD/MM/AAAA HH:MM.';
         return;
     }
 
     const dadosCheckout = {
         id_locacao:      document.getElementById('id_locacao_checkout').value,
         quarto:          document.getElementById('quarto_checkout').value,
-        data_hora_saida: saidaVal
+        data_hora_saida: saidaISO
     };
 
     fetch('../backend/api.php?acao=fazer_checkout', {
@@ -283,7 +315,10 @@ function confirmarLimpeza() {
             fecharModalLimpeza();
             carregarQuartos();
         } else {
-            alert(dados.mensagem);
+            const el = document.getElementById('mensagemLimpeza');
+            el.classList.remove('hidden');
+            el.style.color = '#dc2626';
+            el.innerText = dados.mensagem;
         }
     });
 }

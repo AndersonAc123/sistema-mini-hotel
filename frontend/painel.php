@@ -518,31 +518,65 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
             });
         }
 
+        function mostrarToast(msg, sucesso) {
+            const t = document.getElementById('toastPainel');
+            t.innerText = msg;
+            t.style.background = sucesso ? '#16a34a' : '#dc2626';
+            t.classList.remove('hidden');
+            clearTimeout(t._timer);
+            t._timer = setTimeout(() => t.classList.add('hidden'), 2800);
+        }
+
         function reativarQuarto(num) {
             fetch('../backend/api.php?acao=reativar_quarto', {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ numero: num })
             }).then(r => r.json()).then(dados => {
-                alert(dados.mensagem);
+                mostrarToast(dados.mensagem, dados.sucesso);
                 if (dados.sucesso) { carregarListaQuartos(); carregarQuartosInativos(); }
             });
         }
 
         function confirmarDesativar(num) {
-            if (confirm(`Desativar o quarto ${num}? O histórico será preservado.`)) {
+            document.getElementById('numQuartoConfirm').innerText = num;
+            document.getElementById('modalConfirmDesativar').classList.remove('hidden');
+            document.getElementById('btnConfirmDesativar').onclick = function() {
+                document.getElementById('modalConfirmDesativar').classList.add('hidden');
                 fetch('../backend/api.php?acao=desativar_quarto', {
                     method: 'POST', headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ numero: num })
                 }).then(r => r.json()).then(dados => {
-                    alert(dados.mensagem);
+                    mostrarToast(dados.mensagem, dados.sucesso);
                     if (dados.sucesso) { carregarListaQuartos(); carregarQuartosInativos(); }
                 });
-            }
+            };
         }
 
         carregarPainel();
         carregarListaQuartos();
         carregarQuartosInativos();
     </script>
+
+    <!-- TOAST -->
+    <div id="toastPainel" class="hidden fixed bottom-5 left-1/2 -translate-x-1/2 z-50 text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-lg" style="min-width:220px;text-align:center;"></div>
+
+    <!-- MODAL: CONFIRMAR DESATIVAÇÃO -->
+    <div id="modalConfirmDesativar" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color:rgba(0,0,0,0.65);">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm text-center px-6 py-7">
+            <p class="text-stone-800 font-bold text-lg mb-1">Desativar Quarto <span id="numQuartoConfirm"></span>?</p>
+            <p class="text-stone-400 text-sm mb-6">O histórico de locações será preservado.</p>
+            <div class="flex gap-3">
+                <button onclick="document.getElementById('modalConfirmDesativar').classList.add('hidden')"
+                    class="flex-1 py-2.5 rounded-xl border border-stone-200 text-stone-600 font-semibold text-sm hover:bg-stone-50 transition">
+                    Cancelar
+                </button>
+                <button id="btnConfirmDesativar"
+                    class="flex-1 py-2.5 rounded-xl text-white font-semibold text-sm transition"
+                    style="background-color:#dc2626;" onmouseover="this.style.backgroundColor='#b91c1c'" onmouseout="this.style.backgroundColor='#dc2626'">
+                    Desativar
+                </button>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

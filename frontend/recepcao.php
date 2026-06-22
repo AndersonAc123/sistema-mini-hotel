@@ -100,8 +100,8 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
                             class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Data/Hora Entrada *</label>
-                        <input type="datetime-local" id="data_hora_entrada" required
+                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Entrada *</label>
+                        <input type="text" id="data_hora_entrada" placeholder="DD/MM/AAAA HH:MM" maxlength="16" required
                             class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                     </div>
                 </div>
@@ -154,7 +154,7 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
 
                 <div class="mb-4">
                     <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Data/Hora de Saída *</label>
-                    <input type="datetime-local" id="data_hora_saida_input"
+                    <input type="text" id="data_hora_saida_input" placeholder="DD/MM/AAAA HH:MM" maxlength="16"
                         class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                 </div>
 
@@ -192,6 +192,7 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
                 <p class="text-stone-400 text-sm mb-5">O quarto voltará a ficar disponível para locação.</p>
 
                 <input type="hidden" id="quarto_limpeza_id">
+                <div id="mensagemLimpeza" class="text-sm font-medium mb-3 hidden"></div>
                 <button onclick="confirmarLimpeza()"
                     class="w-full text-amber-900 font-semibold py-3 rounded-xl transition active:scale-95"
                     style="background-color:#f59e0b;" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
