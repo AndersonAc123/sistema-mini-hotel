@@ -93,15 +93,21 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
                     </div>
                 </div>
 
+                <div>
+                    <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Nascimento *</label>
+                    <input type="text" id="data_nascimento" placeholder="DD/MM/AAAA" maxlength="10" required
+                        class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Nascimento *</label>
-                        <input type="text" id="data_nascimento" placeholder="DD/MM/AAAA" maxlength="10" required
-                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
-                    </div>
                     <div>
                         <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Entrada *</label>
                         <input type="text" id="data_hora_entrada" placeholder="DD/MM/AAAA HH:MM" maxlength="16" required
+                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Saída Estimada</label>
+                        <input type="text" id="data_hora_saida_estimada" placeholder="DD/MM/AAAA HH:MM" maxlength="16"
                             class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
                     </div>
                 </div>
@@ -141,6 +147,10 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-stone-500">Entrada</span>
                         <span class="font-medium text-stone-700" id="checkoutEntrada">—</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm" id="rowSaidaEstimada">
+                        <span class="text-stone-500">Saída estimada</span>
+                        <span class="font-medium text-stone-600" id="checkoutSaidaEstimada">—</span>
                     </div>
                     <div class="flex justify-between items-center text-sm">
                         <span class="text-stone-500">Horas cobradas</span>

@@ -88,6 +88,14 @@ function textoParaISO(str) {
     return `${ano}-${mes}-${dia}T${hora}`;
 }
 
+function isoParaTexto(str) {
+    // "2025-06-21 14:30:00" → "21/06/2025 14:30"
+    if (!str) return '';
+    const [data, hora] = str.replace('T', ' ').split(' ');
+    const [ano, mes, dia] = data.split('-');
+    return `${dia}/${mes}/${ano} ${hora.slice(0, 5)}`;
+}
+
 function parseDataHoraTexto(str) {
     const iso = textoParaISO(str);
     return iso ? new Date(iso) : null;
@@ -107,6 +115,7 @@ function mascaraDataHora(e) {
 }
 
 document.getElementById('data_hora_entrada').addEventListener('input', mascaraDataHora);
+document.getElementById('data_hora_saida_estimada').addEventListener('input', mascaraDataHora);
 document.getElementById('data_hora_saida_input').addEventListener('input', function(e) {
     mascaraDataHora(e);
     atualizarTotalCheckout();
@@ -150,6 +159,7 @@ function fecharModal() {
     document.getElementById('modalCheckin').classList.add('hidden');
     document.getElementById('formCheckin').reset();
     document.getElementById('mensagemModal').classList.add('hidden');
+    document.getElementById('data_hora_saida_estimada').value = '';
 }
 
 document.getElementById('formCheckin').addEventListener('submit', function(e) {
@@ -167,7 +177,8 @@ document.getElementById('formCheckin').addEventListener('submit', function(e) {
         telefone:         document.getElementById('telefone').value,
         data_nascimento:  dataParaBanco,
         placa_veiculo:    document.getElementById('placa_veiculo').value,
-        data_hora_entrada: textoParaISO(document.getElementById('data_hora_entrada').value)
+        data_hora_entrada:         textoParaISO(document.getElementById('data_hora_entrada').value),
+        data_hora_saida_estimada:  textoParaISO(document.getElementById('data_hora_saida_estimada').value) || null
     };
 
     fetch('../backend/api.php?acao=fazer_checkin', {
@@ -213,6 +224,17 @@ function abrirModalCheckout(numeroQuarto) {
             document.getElementById('id_locacao_checkout').value = dados.id_locacao;
             document.getElementById('entrada_iso_checkout').value = dados.data_hora_entrada_iso;
             document.getElementById('valor_hora_checkout').value  = dados.valor_hora;
+
+            const estimada = dados.saida_estimada_formatada;
+            document.getElementById('checkoutSaidaEstimada').innerText = estimada || '—';
+            document.getElementById('rowSaidaEstimada').style.display = estimada ? '' : 'none';
+
+            if (dados.data_hora_saida_estimada) {
+                document.getElementById('data_hora_saida_input').value =
+                    isoParaTexto(dados.data_hora_saida_estimada);
+            } else {
+                document.getElementById('data_hora_saida_input').value = agoraTexto();
+            }
             atualizarTotalCheckout();
         } else {
             const el = document.getElementById('mensagemCheckout');

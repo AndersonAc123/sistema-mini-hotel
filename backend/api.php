@@ -43,17 +43,20 @@ switch ($acao) {
                 ]);
                 $id_cliente = $pdo->lastInsertId();
 
-                // datetime-local envia "YYYY-MM-DDTHH:MM"; MySQL aceita com espaço
-                $dataEntrada = str_replace('T', ' ', $dados->data_hora_entrada);
+                $dataEntrada   = str_replace('T', ' ', $dados->data_hora_entrada);
+                $saidaEstimada = !empty($dados->data_hora_saida_estimada)
+                    ? str_replace('T', ' ', $dados->data_hora_saida_estimada)
+                    : null;
 
-                $sqlLocacao = "INSERT INTO locacao (id_cliente, numero_quarto, data_hora_entrada, tempo_estimado_horas, placa_veiculo, status_caixa)
-                               VALUES (:id_cliente, :quarto, :entrada, 0, :placa, 'Aberto')";
+                $sqlLocacao = "INSERT INTO locacao (id_cliente, numero_quarto, data_hora_entrada, data_hora_saida_estimada, tempo_estimado_horas, placa_veiculo, status_caixa)
+                               VALUES (:id_cliente, :quarto, :entrada, :saida_estimada, 0, :placa, 'Aberto')";
                 $stmtLocacao = $pdo->prepare($sqlLocacao);
                 $stmtLocacao->execute([
-                    ':id_cliente' => $id_cliente,
-                    ':quarto'     => $dados->quarto,
-                    ':entrada'    => $dataEntrada,
-                    ':placa'      => $dados->placa_veiculo ?? null
+                    ':id_cliente'     => $id_cliente,
+                    ':quarto'         => $dados->quarto,
+                    ':entrada'        => $dataEntrada,
+                    ':saida_estimada' => $saidaEstimada,
+                    ':placa'          => $dados->placa_veiculo ?? null
                 ]);
 
                 $sqlQuarto = "UPDATE quarto SET status_quarto = 'Ocupado' WHERE numero_quarto = :quarto";
@@ -74,7 +77,7 @@ switch ($acao) {
     case 'obter_detalhes_checkout':
         if (!empty($_GET['quarto'])) {
             try {
-                $sql = "SELECT l.id_locacao, l.data_hora_entrada, c.nome, cq.valor_hora
+                $sql = "SELECT l.id_locacao, l.data_hora_entrada, l.data_hora_saida_estimada, c.nome, cq.valor_hora
                         FROM locacao l
                         INNER JOIN cliente c ON l.id_cliente = c.id_cliente
                         INNER JOIN quarto q ON l.numero_quarto = q.numero_quarto
@@ -86,13 +89,18 @@ switch ($acao) {
 
                 if ($locacao) {
                     $entrada = new DateTime($locacao['data_hora_entrada']);
+                    $estimada = $locacao['data_hora_saida_estimada']
+                        ? (new DateTime($locacao['data_hora_saida_estimada']))->format('d/m/Y H:i')
+                        : null;
                     echo json_encode([
-                        'sucesso'              => true,
-                        'id_locacao'           => $locacao['id_locacao'],
-                        'nome'                 => $locacao['nome'],
-                        'entrada'              => $entrada->format('d/m/Y H:i'),
-                        'data_hora_entrada_iso'=> $locacao['data_hora_entrada'],
-                        'valor_hora'           => $locacao['valor_hora']
+                        'sucesso'                   => true,
+                        'id_locacao'                => $locacao['id_locacao'],
+                        'nome'                      => $locacao['nome'],
+                        'entrada'                   => $entrada->format('d/m/Y H:i'),
+                        'data_hora_entrada_iso'     => $locacao['data_hora_entrada'],
+                        'data_hora_saida_estimada'  => $locacao['data_hora_saida_estimada'],
+                        'saida_estimada_formatada'  => $estimada,
+                        'valor_hora'                => $locacao['valor_hora']
                     ]);
                 } else {
                     echo json_encode(['sucesso' => false, 'mensagem' => 'Nenhuma locação ativa encontrada.']);

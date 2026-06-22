@@ -37,12 +37,13 @@ CREATE TABLE cliente (
     data_nascimento DATE NOT NULL
 );
 
--- 5. Tabela de Locações 
+-- 5. Tabela de Locações
 CREATE TABLE locacao (
     id_locacao INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente INT,
     numero_quarto INT,
     data_hora_entrada DATETIME NOT NULL,
+    data_hora_saida_estimada DATETIME NULL,
     data_hora_saida DATETIME NULL,
     tempo_estimado_horas INT NOT NULL,
     valor_total DECIMAL(10,2) NULL,
@@ -51,6 +52,9 @@ CREATE TABLE locacao (
     FOREIGN KEY (id_cliente) REFERENCES cliente(id_cliente),
     FOREIGN KEY (numero_quarto) REFERENCES quarto(numero_quarto)
 );
+
+-- Caso o banco já exista, rodar:
+-- ALTER TABLE locacao ADD COLUMN data_hora_saida_estimada DATETIME NULL AFTER data_hora_entrada;
 
 -- =========================================================
 -- dados exenciais, o meureuuuuuuuuuuu
