@@ -105,11 +105,12 @@ function abrirModal(numeroQuarto) {
     document.getElementById('quarto_selecionado').value = numeroQuarto;
     document.getElementById('mensagemModal').classList.add('hidden');
 
-    // Preenche data/hora de entrada com o momento atual
+    // Preenche data/hora de entrada com o momento atual (horário local)
     const agora = new Date();
     agora.setSeconds(0, 0);
+    const offset = agora.getTimezoneOffset() * 60000;
     document.getElementById('data_hora_entrada').value =
-        agora.toISOString().slice(0, 16);
+        new Date(agora - offset).toISOString().slice(0, 16);
 }
 
 function fecharModal() {
@@ -168,10 +169,12 @@ function abrirModalCheckout(numeroQuarto) {
     ['checkoutNome','checkoutEntrada','checkoutHoras','checkoutTotal']
         .forEach(id => document.getElementById(id).innerText = '...');
 
-    // Preenche saída com horário atual
+    // Preenche saída com horário atual (horário local)
     const agora = new Date();
     agora.setSeconds(0, 0);
-    document.getElementById('data_hora_saida_input').value = agora.toISOString().slice(0, 16);
+    const offset = agora.getTimezoneOffset() * 60000;
+    document.getElementById('data_hora_saida_input').value =
+        new Date(agora - offset).toISOString().slice(0, 16);
 
     fetch(`../backend/api.php?acao=obter_detalhes_checkout&quarto=${numeroQuarto}`)
     .then(r => r.json())

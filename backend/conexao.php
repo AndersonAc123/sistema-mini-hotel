@@ -3,7 +3,7 @@
 date_default_timezone_set('America/Sao_Paulo');
 
 $host = 'localhost';
-$dbname = 'mini_hotel';
+$dbname = 'hostel';
 $usuario = 'root';
 $senha = ''; // Se você usa senha no XAMPP/MySQL, coloque aqui
 

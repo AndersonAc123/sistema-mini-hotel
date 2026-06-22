@@ -10,7 +10,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Gerencial — Mini Hotel</title>
+    <title>Painel Gerencial — Hostel</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen" style="background-color:#f5f3ff;">
@@ -25,7 +25,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-white font-bold text-base leading-tight">Mini Hotel</h1>
+                    <h1 class="text-white font-bold text-base leading-tight">Hostel</h1>
                     <p class="text-violet-300 text-xs">Painel Gerencial</p>
                 </div>
             </div>
@@ -35,7 +35,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
                     Relatório de Locações
                 </button>
                 <a href="recepcao.php" class="text-violet-200 hover:text-violet-100 text-sm font-medium transition">Recepção</a>
-                <a href="login.html" class="text-red-400 hover:text-red-300 text-sm font-medium transition">Sair</a>
+                <a href="logout.php" class="text-red-400 hover:text-red-300 text-sm font-medium transition">Sair</a>
             </div>
         </div>
     </header>
@@ -412,7 +412,10 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
         }
         function fecharModalCaixa() { document.getElementById('modalFecharCaixa').classList.add('hidden'); }
         function confirmarFechamentoCaixa() {
-            fetch('../backend/api.php?acao=fechar_caixa').then(r => r.json()).then(dados => {
+            fetch('../backend/api.php?acao=fechar_caixa', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({})
+            }).then(r => r.json()).then(dados => {
                 mostrarMsg('mensagemCaixa', dados.mensagem, dados.sucesso);
                 if (dados.sucesso) setTimeout(() => { fecharModalCaixa(); carregarPainel(); }, 1400);
             });
@@ -532,7 +535,7 @@ if (!isset($_SESSION['id_usuario']) || $_SESSION['nivel'] !== 'admin') {
                     body: JSON.stringify({ numero: num })
                 }).then(r => r.json()).then(dados => {
                     alert(dados.mensagem);
-                    if (dados.sucesso) carregarListaQuartos();
+                    if (dados.sucesso) { carregarListaQuartos(); carregarQuartosInativos(); }
                 });
             }
         }
