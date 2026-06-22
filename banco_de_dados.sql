@@ -1,7 +1,7 @@
--- Estrutura do Banco de Dados: Mini Hotel
+-- Estrutura do Banco de Dados: Hostel
 
-CREATE DATABASE mini_hotel;
-USE mini_hotel;
+CREATE DATABASE hostel;
+USE hostel;
 
 -- 1. Tabela de Usuários (Acesso ao Sistema)
 CREATE TABLE usuario (
@@ -24,6 +24,7 @@ CREATE TABLE quarto (
     numero_quarto INT PRIMARY KEY,
     codigo_categoria INT,
     status_quarto VARCHAR(20) DEFAULT 'Livre',
+    ativo TINYINT(1) DEFAULT 1,
     FOREIGN KEY (codigo_categoria) REFERENCES categoria_quarto(codigo_categoria)
 );
 

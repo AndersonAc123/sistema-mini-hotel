@@ -6,104 +6,198 @@ if (!isset($_SESSION['id_usuario'])) { header("Location: login.html"); exit; }
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>Painel da Recepção</title>
-    <style>
-        body { font-family: Arial, sans-serif; background-color: #f4f4f9; padding: 20px; }
-        .cabecalho { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .btn-admin { background: #ffc107; color: black; padding: 10px 15px; text-decoration: none; border-radius: 4px; font-weight: bold; }
-        .grid-quartos { display: grid; grid-template-columns: repeat(5, 1fr); gap: 15px; margin-top: 20px; }
-        .card-quarto { background: white; padding: 20px; border-radius: 8px; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1); cursor: pointer; border-left: 5px solid gray; }
-        .card-quarto h3 { margin: 0; font-size: 24px; }
-        .card-quarto p { margin: 5px 0; color: #555; }
-        .livre { border-left-color: #28a745; }
-        .ocupado { border-left-color: #dc3545; }
-        .limpeza { border-left-color: #ffc107; }
-        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); }
-        .modal-conteudo { background-color: #fff; margin: 5% auto; padding: 20px; border-radius: 8px; width: 90%; max-width: 400px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
-        .fechar-modal { color: #aaa; float: right; font-size: 28px; font-weight: bold; cursor: pointer; }
-        .fechar-modal:hover { color: black; }
-        .modal input { display: block; width: 90%; margin-bottom: 10px; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .btn-confirmar { width: 100%; padding: 10px; background: #28a745; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 15px; }
-        .btn-confirmar:hover { opacity: 0.9; }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recepção — Hostel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <div class="cabecalho">
-        <h2>Olá, <?= $_SESSION['nome'] ?>!</h2>
-        <div>
-            <?php if ($_SESSION['nivel'] == 'admin'): ?>
-                <a href="painel.php" class="btn-admin">Painel Gerencial</a>
-            <?php endif; ?> 
-            <a href="login.html" style="margin-left: 15px; color: red; text-decoration: none;">Sair</a>
+<body class="min-h-screen" style="background-color:#f5f3ff;">
+
+    <!-- NAVBAR -->
+    <header class="sticky top-0 z-10 shadow-lg" style="background-color:#1e1b4b;">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style="background-color:#7c3aed;">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-violet-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 21h19.5M3.75 3h16.5M4.5 3v18M19.5 3v18M9 7.5h1.5m4.5 0H16.5M9 12h1.5m4.5 0H16.5M9 16.5h1.5m4.5 0H16.5" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-white font-bold text-base leading-tight">Hostel</h1>
+                    <p class="text-violet-300 text-xs">Recepção</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-4">
+                <span class="text-violet-200 text-sm hidden sm:inline">Olá, <strong><?= htmlspecialchars($_SESSION['nome']) ?></strong></span>
+                <?php if ($_SESSION['nivel'] == 'admin'): ?>
+                    <a href="painel.php"
+                        class="text-sm font-medium px-3 py-1.5 rounded-lg transition text-white"
+                        style="background-color:#7c3aed;" onmouseover="this.style.backgroundColor='#6d28d9'" onmouseout="this.style.backgroundColor='#7c3aed'">
+                        Painel Gerencial
+                    </a>
+                <?php endif; ?>
+                <a href="logout.php" class="text-red-400 hover:text-red-300 text-sm font-medium transition">Sair</a>
+            </div>
         </div>
-    </div>
+    </header>
 
-    <div class="grid-quartos" id="listaQuartos"></div>
+    <!-- CONTEÚDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
 
-    <div id="modalCheckin" class="modal">
-        <div class="modal-conteudo">
-            <span class="fechar-modal" onclick="fecharModal()">&times;</span>
-            <h2 id="tituloModal">Entrada - Quarto</h2>
-            
-            <form id="formCheckin">
-                <input type="hidden" id="quarto_selecionado">
-                
-                <label>Nome Completo *</label>
-                <input type="text" id="nome" required>
-
-                <label>CPF *</label>
-                <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" required>
-
-                <label>Telefone *</label>
-                <input type="text" id="telefone" placeholder="(00) 00000-0000" maxlength="15" required>
-
-                <label>Data de Nascimento *</label>
-                <input type="text" id="data_nascimento" placeholder="DD/MM/AAAA" maxlength="10" required>
-
-                <label>Placa do Veículo (Opcional)</label>
-                <input type="text" id="placa_veiculo" placeholder="ABC-1234">
-
-                <label>Tempo Estimado (Horas) *</label>
-                <input type="number" id="tempo_estimado" min="1" required>
-
-                <button type="submit" class="btn-confirmar">Confirmar Check-in</button>
-            </form>
-            <div id="mensagemModal" style="margin-top: 10px; font-weight: bold;"></div>
+        <!-- Legenda de status -->
+        <div class="flex flex-wrap items-center gap-5 mb-6">
+            <h2 class="text-stone-700 font-semibold text-lg mr-2">Quartos</h2>
+            <div class="flex items-center gap-1.5 text-sm text-stone-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-green-500 inline-block"></span> Livre
+            </div>
+            <div class="flex items-center gap-1.5 text-sm text-stone-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-red-500 inline-block"></span> Ocupado
+            </div>
+            <div class="flex items-center gap-1.5 text-sm text-stone-500">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-400 inline-block"></span> Em Limpeza
+            </div>
         </div>
-    </div>
 
-    <div id="modalCheckout" class="modal">
-        <div class="modal-conteudo">
-            <span class="fechar-modal" onclick="fecharModalCheckout()">&times;</span>
-            <h2>Finalizar Locação - Quarto <span id="numQuartoCheckout"></span></h2>
-            
-            <div id="detalhesCheckout" style="margin-top: 15px; line-height: 1.6;">
-                <p><strong>Hóspede:</strong> <span id="checkoutNome">Carregando...</span></p>
-                <p><strong>Entrada:</strong> <span id="checkoutEntrada">--/--/----</span></p>
-                <p><strong>Tempo Estimado:</strong> <span id="checkoutTempo">0</span>h</p>
-                <p style="color: #007bff;"><strong>Tempo Cobrado (com extras):</strong> <span id="checkoutReal">0</span></p>
-                <hr>
-                <h3 style="color: #dc3545;">Total a Pagar: R$ <span id="checkoutTotal">0.00</span></h3>
+        <!-- Grid de quartos (preenchido via JS) -->
+        <div id="listaQuartos" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"></div>
+    </main>
+
+    <!-- ================================================ -->
+    <!-- MODAL: CHECK-IN                                  -->
+    <!-- ================================================ -->
+    <div id="modalCheckin" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color:rgba(0,0,0,0.65);">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-screen overflow-y-auto">
+            <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-stone-100">
+                <h2 id="tituloModal" class="text-lg font-bold text-stone-800">Entrada — Quarto</h2>
+                <button onclick="fecharModal()" class="text-stone-400 hover:text-stone-600 text-2xl leading-none transition">&times;</button>
             </div>
 
-            <input type="hidden" id="id_locacao_checkout">
-            <input type="hidden" id="quarto_checkout">
-            
-            <button onclick="confirmarCheckout()" class="btn-confirmar" style="background: #dc3545;">Finalizar e Enviar para Limpeza</button>
-            <div id="mensagemCheckout" style="margin-top: 10px; font-weight: bold;"></div>
+            <form id="formCheckin" class="px-6 py-5 space-y-3">
+                <input type="hidden" id="quarto_selecionado">
+
+                <div>
+                    <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Nome Completo *</label>
+                    <input type="text" id="nome" required
+                        class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">CPF *</label>
+                        <input type="text" id="cpf" placeholder="000.000.000-00" maxlength="14" required
+                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Telefone *</label>
+                        <input type="text" id="telefone" placeholder="(00) 00000-0000" maxlength="15" required
+                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Nascimento *</label>
+                        <input type="text" id="data_nascimento" placeholder="DD/MM/AAAA" maxlength="10" required
+                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Data/Hora Entrada *</label>
+                        <input type="datetime-local" id="data_hora_entrada" required
+                            class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Placa do Veículo (opcional)</label>
+                    <input type="text" id="placa_veiculo" placeholder="ABC-1234"
+                        class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
+                </div>
+
+                <button type="submit"
+                    class="w-full text-white font-semibold py-3 rounded-xl transition mt-2 active:scale-95"
+                    style="background-color:#16a34a;" onmouseover="this.style.backgroundColor='#15803d'" onmouseout="this.style.backgroundColor='#16a34a'">
+                    Confirmar Check-in
+                </button>
+                <div id="mensagemModal" class="text-center text-sm font-medium mt-1 hidden"></div>
+            </form>
         </div>
     </div>
 
-    <div id="modalLimpeza" class="modal">
-        <div class="modal-conteudo" style="text-align: center;">
-            <span class="fechar-modal" onclick="fecharModalLimpeza()">&times;</span>
-            <h2 style="color: #ffc107;">Quarto <span id="numQuartoLimpeza"></span></h2>
-            
-            <p style="margin-top: 15px; font-size: 18px;">A equipe finalizou a higienização deste quarto?</p>
-            <p style="color: #555; font-size: 14px; margin-bottom: 20px;">Ao confirmar, o quarto voltará a ficar "Livre" (Verde) para locação.</p>
+    <!-- ================================================ -->
+    <!-- MODAL: CHECK-OUT                                 -->
+    <!-- ================================================ -->
+    <div id="modalCheckout" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color:rgba(0,0,0,0.65);">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm">
+            <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-stone-100">
+                <h2 class="text-lg font-bold text-stone-800">Check-out — Quarto <span id="numQuartoCheckout"></span></h2>
+                <button onclick="fecharModalCheckout()" class="text-stone-400 hover:text-stone-600 text-2xl leading-none transition">&times;</button>
+            </div>
 
-            <input type="hidden" id="quarto_limpeza_id">
-            <button onclick="confirmarLimpeza()" class="btn-confirmar" style="background: #ffc107; color: black; font-weight: bold;">Sim, Liberar Quarto</button>
+            <div class="px-6 py-5">
+                <div class="bg-violet-50 rounded-xl p-4 space-y-2.5 border border-violet-100 mb-4">
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-stone-500">Hóspede</span>
+                        <span class="font-semibold text-stone-800" id="checkoutNome">—</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-stone-500">Entrada</span>
+                        <span class="font-medium text-stone-700" id="checkoutEntrada">—</span>
+                    </div>
+                    <div class="flex justify-between items-center text-sm">
+                        <span class="text-stone-500">Horas cobradas</span>
+                        <span class="font-medium text-violet-600" id="checkoutHoras">—</span>
+                    </div>
+                    <div class="border-t border-violet-200 pt-3 mt-1 flex justify-between items-center">
+                        <span class="font-bold text-stone-700">Total a Pagar</span>
+                        <span class="text-2xl font-bold text-red-600">R$ <span id="checkoutTotal">0,00</span></span>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">Data/Hora de Saída *</label>
+                    <input type="datetime-local" id="data_hora_saida_input"
+                        class="w-full px-3 py-2.5 border border-stone-200 rounded-lg text-stone-800 bg-stone-50 focus:outline-none focus:ring-2 focus:ring-violet-400 focus:bg-white transition text-sm">
+                </div>
+
+                <input type="hidden" id="id_locacao_checkout">
+                <input type="hidden" id="quarto_checkout">
+                <input type="hidden" id="entrada_iso_checkout">
+                <input type="hidden" id="valor_hora_checkout">
+
+                <button onclick="confirmarCheckout()"
+                    class="w-full text-white font-semibold py-3 rounded-xl transition active:scale-95"
+                    style="background-color:#dc2626;" onmouseover="this.style.backgroundColor='#b91c1c'" onmouseout="this.style.backgroundColor='#dc2626'">
+                    Finalizar e Enviar para Limpeza
+                </button>
+                <div id="mensagemCheckout" class="text-center text-sm font-medium mt-2 hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================================================ -->
+    <!-- MODAL: LIMPEZA                                   -->
+    <!-- ================================================ -->
+    <div id="modalLimpeza" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4" style="background-color:rgba(0,0,0,0.65);">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm text-center">
+            <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-stone-100">
+                <h2 class="text-lg font-bold text-amber-700">Quarto <span id="numQuartoLimpeza"></span></h2>
+                <button onclick="fecharModalLimpeza()" class="text-stone-400 hover:text-stone-600 text-2xl leading-none transition">&times;</button>
+            </div>
+            <div class="px-6 py-6">
+                <div class="w-14 h-14 bg-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <p class="text-stone-700 font-medium mb-1">A limpeza deste quarto foi concluída?</p>
+                <p class="text-stone-400 text-sm mb-5">O quarto voltará a ficar disponível para locação.</p>
+
+                <input type="hidden" id="quarto_limpeza_id">
+                <button onclick="confirmarLimpeza()"
+                    class="w-full text-amber-900 font-semibold py-3 rounded-xl transition active:scale-95"
+                    style="background-color:#f59e0b;" onmouseover="this.style.backgroundColor='#d97706'" onmouseout="this.style.backgroundColor='#f59e0b'">
+                    Sim, Liberar Quarto
+                </button>
+            </div>
         </div>
     </div>
 
